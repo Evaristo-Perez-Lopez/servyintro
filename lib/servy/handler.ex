@@ -6,6 +6,7 @@ defmodule Servy.Handler do
 
     request
     |> parse
+    |> log
     |> route
     |> format_response
   end
@@ -23,15 +24,22 @@ defmodule Servy.Handler do
     %{method: method, path: path, resp_body: ""}
   end
 
+  # single_line function
+  def log(conv), do: IO.inspect("LOG: #{conv}")
+
   def route(conv) do
-    # conv = %{method: "GET", path: "/wildthings", resp_body: "Hello from Servy!"}
-    %{conv | resp_body: "Hello from Servy!"}
+    route(conv, conv.method, conv.path)
+  end
+
+  def route(conv, "GET", "/gender") do
+    %{conv | resp_body: "Rock, Blue, Classic"}
+  end
+
+  def route(conv, "GET", "/author") do
+    %{conv | resp_body: "Eva, Logi, Beto"}
   end
 
   def format_response(conv) do
-    # IO.puts("FORMAT: #{conv}")
-    IO.puts("--- FORMAT ---")
-
     """
     HTTP/1.1 200 OK
     Content-Type: text/html
@@ -43,7 +51,7 @@ defmodule Servy.Handler do
 end
 
 request = """
-GET /wildthings HTTP/1.1
+GET /gender HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
