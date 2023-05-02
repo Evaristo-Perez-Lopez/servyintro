@@ -40,6 +40,11 @@ defmodule Servy.Handler do
     %{conv | resp_body: "Eva, Logi, Beto"}
   end
 
+  # define a function to match any other path or method
+  def route(conv, _method, path) do
+    %{conv | resp_body: "Not found #{path}"}
+  end
+
   def format_response(conv) do
     """
     HTTP/1.1 200 OK
