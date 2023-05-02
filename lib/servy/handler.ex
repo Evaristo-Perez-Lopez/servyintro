@@ -20,23 +20,24 @@ defmodule Servy.Handler do
 
     IO.puts("METHOD: #{method}")
     IO.puts("PATH: #{path}")
-    %{method: "GET", path: "/wildthings", resp_body: ""}
+    %{method: method, path: path, resp_body: ""}
   end
 
   def route(conv) do
-    # IO.puts("ROUTE: #{conv}")
-    _conv = %{method: "GET", path: "/wildthings", resp_body: "Hello from Servy!"}
+    # conv = %{method: "GET", path: "/wildthings", resp_body: "Hello from Servy!"}
+    %{conv | resp_body: "Hello from Servy!"}
   end
 
   def format_response(conv) do
     # IO.puts("FORMAT: #{conv}")
+    IO.puts("--- FORMAT ---")
 
     """
     HTTP/1.1 200 OK
     Content-Type: text/html
-    Content-Length: 20
+    Content-Length: #{byte_size(conv.resp_body)}
     
-    Hello from Servy!
+    #{conv.resp_body}
     """
   end
 end
