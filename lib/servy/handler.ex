@@ -25,12 +25,13 @@ defmodule Servy.Handler do
   end
 
   # single_line function
-  def log(conv), do: IO.inspect("LOG: #{conv}")
+  def log(conv), do: IO.inspect(conv)
 
   def route(conv) do
     route(conv, conv.method, conv.path)
   end
 
+  # functions clauses
   def route(conv, "GET", "/gender") do
     %{conv | resp_body: "Rock, Blue, Classic"}
   end
@@ -52,6 +53,28 @@ end
 
 request = """
 GET /gender HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+response = Servy.Handler.handle(request)
+IO.puts(response)
+
+request = """
+GET /author HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+response = Servy.Handler.handle(request)
+IO.puts(response)
+
+request = """
+GET /noncatch HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
