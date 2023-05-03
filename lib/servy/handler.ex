@@ -21,7 +21,7 @@ defmodule Servy.Handler do
 
     IO.puts("METHOD: #{method}")
     IO.puts("PATH: #{path}")
-    %{method: method, path: path, resp_body: ""}
+    %{method: method, path: path, status: nil, resp_body: ""}
   end
 
   # single_line function
@@ -33,26 +33,42 @@ defmodule Servy.Handler do
 
   # functions clauses
   def route(conv, "GET", "/gender") do
-    %{conv | resp_body: "Rock, Blue, Classic"}
+    %{conv | status: 200, resp_body: "Rock, Blue, Classic"}
   end
 
   def route(conv, "GET", "/author") do
-    %{conv | resp_body: "Eva, Logi, Beto"}
+    %{conv | status: 200, resp_body: "Eva, Logi, Beto"}
+  end
+
+  def route(conv, "GET", "/author/" <> id) do
+    %{conv | status: 200, resp_body: "Eva #{String.upcase(id)}"}
   end
 
   # define a function to match any other path or method
   def route(conv, _method, path) do
-    %{conv | resp_body: "Not found #{path}"}
+    %{conv | status: 404, resp_body: "Not found #{path}"}
   end
 
   def format_response(conv) do
     """
-    HTTP/1.1 200 OK
+    HTTP/1.1 #{conv.status} #{message_reason(conv.status)}
     Content-Type: text/html
     Content-Length: #{byte_size(conv.resp_body)}
     
     #{conv.resp_body}
     """
+  end
+
+  defp message_reason(code) do
+    %{
+      200 => "OK",
+      201 => "Created",
+      400 => "Bad Request",
+      401 => "Unauthorized",
+      403 => "Forbidden",
+      404 => "Not Found",
+      500 => "Internal Server Error"
+    }[code]
   end
 end
 
@@ -80,6 +96,17 @@ IO.puts(response)
 
 request = """
 GET /noncatch HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+response = Servy.Handler.handle(request)
+IO.puts(response)
+
+request = """
+GET /author/eva HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
