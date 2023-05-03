@@ -8,8 +8,16 @@ defmodule Servy.Handler do
     |> parse
     |> log
     |> route
+    |> track_errors
     |> format_response
   end
+
+  def track_errors(%{status: 404, path: path} = conv) do
+    IO.puts("Error 404 in #{path}")
+    conv
+  end
+
+  def track_errors(conv), do: conv
 
   def parse(request) do
     # Desestructura el arreglo (tupla)
@@ -27,25 +35,25 @@ defmodule Servy.Handler do
   # single_line function
   def log(conv), do: IO.inspect(conv)
 
-  def route(conv) do
-    route(conv, conv.method, conv.path)
-  end
+  # def route(conv) do
+  #   route(conv, conv.method, conv.path)
+  # end
 
   # functions clauses
-  def route(conv, "GET", "/gender") do
+  def route(%{method: "GET", path: "/gender"} = conv) do
     %{conv | status: 200, resp_body: "Rock, Blue, Classic"}
   end
 
-  def route(conv, "GET", "/author") do
+  def route(%{method: "GET", path: "/author"} = conv) do
     %{conv | status: 200, resp_body: "Eva, Logi, Beto"}
   end
 
-  def route(conv, "GET", "/author/" <> id) do
+  def route(%{method: "GET", path: "/author/" <> id} = conv) do
     %{conv | status: 200, resp_body: "Eva #{String.upcase(id)}"}
   end
 
   # define a function to match any other path or method
-  def route(conv, _method, path) do
+  def route(%{path: path} = conv) do
     %{conv | status: 404, resp_body: "Not found #{path}"}
   end
 
