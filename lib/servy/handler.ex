@@ -2,7 +2,9 @@ defmodule Servy.Handler do
   @moduledoc """
   Handles HTTP resquest
   """
+
   @pages_path Path.expand("../../pages/", __DIR__)
+  alias Servy.Conv
   import Servy.Plugins, only: [log: 1, track_errors: 1]
   import Servy.Parser, only: [parse: 1]
 
@@ -29,15 +31,15 @@ defmodule Servy.Handler do
   # single_line function
   # functions clauses
 
-  def route(%{method: "GET", path: "/gender"} = conv) do
+  def route(%Conv{method: "GET", path: "/gender"} = conv) do
     %{conv | status: 200, resp_body: "Rock, Blue, Classic"}
   end
 
-  def route(%{method: "GET", path: "/author"} = conv) do
+  def route(%Conv{method: "GET", path: "/author"} = conv) do
     %{conv | status: 200, resp_body: "Eva, Logi, Beto"}
   end
 
-  def route(%{method: "GET", path: "/about"} = conv) do
+  def route(%Conv{method: "GET", path: "/about"} = conv) do
     path = Path.expand("../../pages/", __DIR__) |> Path.join("about.html")
     IO.puts("PATH: #{path}")
 
@@ -59,12 +61,12 @@ defmodule Servy.Handler do
     # end
   end
 
-  def route(%{method: "GET", path: "/author/" <> id} = conv) do
+  def route(%Conv{method: "GET", path: "/author/" <> id} = conv) do
     %{conv | status: 200, resp_body: "Eva #{String.upcase(id)}"}
   end
 
   # define a function to match any other path or method
-  def route(%{path: path} = conv) do
+  def route(%Conv{path: path} = conv) do
     %{conv | status: 404, resp_body: "Not found #{path}"}
   end
 
@@ -80,26 +82,14 @@ defmodule Servy.Handler do
     %{conv | status: 500, resp_body: "File error: #{reason}"}
   end
 
-  def format_response(conv) do
+  def format_response(%Conv{} = conv) do
     """
-    HTTP/1.1 #{conv.status} #{message_reason(conv.status)}
+    HTTP/1.1 #{Conv.full_status(conv)}
     Content-Type: text/html
     Content-Length: #{byte_size(conv.resp_body)}
     
     #{conv.resp_body}
     """
-  end
-
-  defp message_reason(code) do
-    %{
-      200 => "OK",
-      201 => "Created",
-      400 => "Bad Request",
-      401 => "Unauthorized",
-      403 => "Forbidden",
-      404 => "Not Found",
-      500 => "Internal Server Error"
-    }[code]
   end
 end
 
