@@ -48,6 +48,22 @@ defmodule Servy.Handler do
     %{conv | status: 200, resp_body: "Eva, Logi, Beto"}
   end
 
+  def route(%{method: "GET", path: "/about"} = conv) do
+    path = Path.expand("../../pages/", __DIR__) |> Path.join("about.html")
+    IO.puts("PATH: #{path}")
+
+    case File.read(path) do
+      {:ok, content} ->
+        %{conv | status: 200, resp_body: content}
+
+      {:error, :enoent} ->
+        %{conv | status: 400, resp_body: "Not found"}
+
+      {:error, reason} ->
+        %{conv | status: 500, resp_body: "File error: #{reason}"}
+    end
+  end
+
   def route(%{method: "GET", path: "/author/" <> id} = conv) do
     %{conv | status: 200, resp_body: "Eva #{String.upcase(id)}"}
   end
@@ -80,41 +96,55 @@ defmodule Servy.Handler do
   end
 end
 
+# request = """
+# GET /gender HTTP/1.1
+# Host: example.com
+# User-Agent: ExampleBrowser/1.0
+# Accept: */*
+
+# """
+
+# response = Servy.Handler.handle(request)
+# IO.puts(response)
+
+# request = """
+# GET /author HTTP/1.1
+# Host: example.com
+# User-Agent: ExampleBrowser/1.0
+# Accept: */*
+
+# """
+
+# response = Servy.Handler.handle(request)
+# IO.puts(response)
+
+# request = """
+# GET /noncatch HTTP/1.1
+# Host: example.com
+# User-Agent: ExampleBrowser/1.0
+# Accept: */*
+
+# """
+
+# response = Servy.Handler.handle(request)
+# IO.puts(response)
+
+# request = """
+# GET /author/eva HTTP/1.1
+# Host: example.com
+# User-Agent: ExampleBrowser/1.0
+# Accept: */*
+
+# """
+
+# response = Servy.Handler.handle(request)
+# IO.puts(response)
+
+# response = Servy.Handler.handle(request)
+# IO.puts(response)
+
 request = """
-GET /gender HTTP/1.1
-Host: example.com
-User-Agent: ExampleBrowser/1.0
-Accept: */*
-
-"""
-
-response = Servy.Handler.handle(request)
-IO.puts(response)
-
-request = """
-GET /author HTTP/1.1
-Host: example.com
-User-Agent: ExampleBrowser/1.0
-Accept: */*
-
-"""
-
-response = Servy.Handler.handle(request)
-IO.puts(response)
-
-request = """
-GET /noncatch HTTP/1.1
-Host: example.com
-User-Agent: ExampleBrowser/1.0
-Accept: */*
-
-"""
-
-response = Servy.Handler.handle(request)
-IO.puts(response)
-
-request = """
-GET /author/eva HTTP/1.1
+GET /about HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
