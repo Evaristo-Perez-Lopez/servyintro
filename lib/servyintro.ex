@@ -3,3 +3,5 @@ defmodule Servyintro do
     "Hi brou! #{name}"
   end
 end
+
+# notes: ds

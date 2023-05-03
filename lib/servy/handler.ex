@@ -52,16 +52,22 @@ defmodule Servy.Handler do
     path = Path.expand("../../pages/", __DIR__) |> Path.join("about.html")
     IO.puts("PATH: #{path}")
 
-    case File.read(path) do
-      {:ok, content} ->
-        %{conv | status: 200, resp_body: content}
+    Path.expand("../../pages/", __DIR__)
+    |> Path.join("about.html")
+    |> File.read()
+    |> handle_file(conv)
 
-      {:error, :enoent} ->
-        %{conv | status: 400, resp_body: "Not found"}
+    # notes: refactor to handle this request with function clauses
+    # case File.read(path) do
+    #   {:ok, content} ->
+    #     %{conv | status: 200, resp_body: content}
 
-      {:error, reason} ->
-        %{conv | status: 500, resp_body: "File error: #{reason}"}
-    end
+    #   {:error, :enoent} ->
+    #     %{conv | status: 400, resp_body: "Not found"}
+
+    #   {:error, reason} ->
+    #     %{conv | status: 500, resp_body: "File error: #{reason}"}
+    # end
   end
 
   def route(%{method: "GET", path: "/author/" <> id} = conv) do
@@ -71,6 +77,18 @@ defmodule Servy.Handler do
   # define a function to match any other path or method
   def route(%{path: path} = conv) do
     %{conv | status: 404, resp_body: "Not found #{path}"}
+  end
+
+  def handle_file({:ok, content}, conv) do
+    %{conv | status: 200, resp_body: content}
+  end
+
+  def handle_file({:error, :enoent}, conv) do
+    %{conv | status: 400, resp_body: "Not found"}
+  end
+
+  def handle_file({:error, reason}, conv) do
+    %{conv | status: 500, resp_body: "File error: #{reason}"}
   end
 
   def format_response(conv) do
