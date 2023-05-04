@@ -35,6 +35,12 @@ defmodule Servy.Handler do
     %{conv | status: 200, resp_body: "Rock, Blue, Classic"}
   end
 
+  def route(%Conv{method: "POST", path: "/author", params: params} = conv) do
+    %{"name" => name} = params
+    # IO.puts(name)
+    %{conv | status: 200, resp_body: "Created author #{name}"}
+  end
+
   def route(%Conv{method: "GET", path: "/author"} = conv) do
     %{conv | status: 200, resp_body: "Eva, Logi, Beto"}
   end
@@ -140,12 +146,26 @@ end
 # response = Servy.Handler.handle(request)
 # IO.puts(response)
 
+# request = """
+# GET /about HTTP/1.1
+# Host: example.com
+# User-Agent: ExampleBrowser/1.0
+# Accept: */*
+
+# """
+
+# response = Servy.Handler.handle(request)
+# IO.puts(response)
+
 request = """
-GET /about HTTP/1.1
+POST /author HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 21
 
+name=Baloo&type=Brown
 """
 
 response = Servy.Handler.handle(request)
