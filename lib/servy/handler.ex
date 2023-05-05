@@ -20,6 +20,10 @@ defmodule Servy.Handler do
     |> format_response
   end
 
+  def route(%Conv{method: "GET", path: "/timer/" <> time} = conv) do
+    spawn(fn -> Servy.Timer.timer(conv, time) end)
+  end
+
   def route(%Conv{method: "GET", path: "/hibernate/" <> time} = conv) do
     time |> String.to_integer() |> :timer.sleep()
 
