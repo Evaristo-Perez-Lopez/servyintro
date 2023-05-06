@@ -4,6 +4,7 @@ defmodule Servy.Handler do
   alias Servy.Conv
   alias Servy.BearController
   alias Servy.VideoCam
+  alias Servy.Fetcher
 
   @pages_path Path.expand("../../pages", __DIR__)
 
@@ -22,31 +23,13 @@ defmodule Servy.Handler do
   end
 
   def route(%Conv{method: "GET", path: "/snapshots"} = conv) do
-    parent = self()
-    spawn(fn -> send(parent, {:result, VideoCam.get_snapshot("cam-1")}) end)
-    spawn(fn -> send(parent, {:result, VideoCam.get_snapshot("cam-2")}) end)
-    spawn(fn -> send(parent, {:result, VideoCam.get_snapshot("cam-3")}) end)
-    # snapshot1 = VideoCam.get_snapshot("cam-1")
-    # snapshot2 = VideoCam.get_snapshot("cam-2")
-    # snapshot3 = VideoCam.get_snapshot("cam-3")
-    snapshot1 =
-      receive do
-        {:result, filename} ->
-          filename
-      end
+    pid1 = Fetcher.async(fn -> VideoCam.get_snapshot("cam-1") end)
+    pid2 = Fetcher.async(fn -> VideoCam.get_snapshot("cam-2") end)
+    pid3 = Fetcher.async(fn -> VideoCam.get_snapshot("cam-3") end)
 
-    snapshot2 =
-      receive do
-        {:result, filename} ->
-          filename
-      end
-
-    snapshot3 =
-      receive do
-        {:result, filename} ->
-          filename
-      end
-
+    snapshot1 = Fetcher.get_result(pid1)
+    snapshot2 = Fetcher.get_result(pid2)
+    snapshot3 = Fetcher.get_result(pid3)
     snapshots = [snapshot1, snapshot2, snapshot3]
 
     %{conv | status: 200, resp_body: inspect(snapshots)}
