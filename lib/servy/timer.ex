@@ -1,5 +1,6 @@
 defmodule Servy.Timer do
   def timer(conv, time) when is_bitstring(time) do
+    IO.puts("Formatting")
     timer(conv, String.to_integer(time))
   end
 
